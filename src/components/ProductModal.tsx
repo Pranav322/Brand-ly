@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Product, Brand } from "../types";
 import { useFirestore } from "../hooks/useFirestore";
+import { ImageUpload } from "./ImageUpload";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -74,7 +75,7 @@ export function ProductModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Name
@@ -176,17 +177,17 @@ export function ProductModal({
 
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Image URL
+              Product Image
             </label>
-            <input
-              type="url"
-              value={formData.imageUrl}
-              onChange={(e) =>
-                setFormData({ ...formData, imageUrl: e.target.value })
-              }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              required
-            />
+            <div className="mt-1">
+              <ImageUpload
+                currentImage={formData.imageUrl}
+                onImageUploaded={(url) =>
+                  setFormData({ ...formData, imageUrl: url })
+                }
+                folder="products"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
