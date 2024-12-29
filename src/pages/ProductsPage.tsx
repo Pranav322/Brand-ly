@@ -3,8 +3,10 @@ import { Package, Edit2, Trash2, Search } from "lucide-react";
 import { useFirestore } from "../hooks/useFirestore";
 import { Product } from "../types";
 import { ProductModal } from "../components/ProductModal";
+import { useNavigate } from "react-router-dom";
 
 export function ProductsPage() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
@@ -105,7 +107,11 @@ export function ProductsPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {products.map((product) => (
-              <tr key={product.id} className="hover:bg-gray-50">
+              <tr
+                key={product.id}
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => navigate(`/products/${product.id}`)}
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-10 w-10 flex-shrink-0">
@@ -138,13 +144,19 @@ export function ProductsPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => handleEdit(product)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent navigation when clicking buttons
+                      handleEdit(product);
+                    }}
                     className="text-blue-600 hover:text-blue-900 mr-4"
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(product.id!)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent navigation when clicking buttons
+                      handleDelete(product.id!);
+                    }}
                     className="text-red-600 hover:text-red-900"
                   >
                     <Trash2 className="w-5 h-5" />

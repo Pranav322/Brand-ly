@@ -3,8 +3,10 @@ import { Building, Edit2, Trash2, Search } from "lucide-react";
 import { useFirestore } from "../hooks/useFirestore";
 import { Brand, Product } from "../types";
 import { BrandModal } from "../components/BrandModal";
+import { useNavigate } from "react-router-dom";
 
 export function BrandsPage() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState<Brand | undefined>();
@@ -108,7 +110,8 @@ export function BrandsPage() {
         {brands.map((brand) => (
           <div
             key={brand.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+            onClick={() => navigate(`/brands/${brand.id}`)}
           >
             <div className="h-48 overflow-hidden">
               <img
@@ -124,13 +127,19 @@ export function BrandsPage() {
               <p className="text-gray-600 mb-4">{brand.description}</p>
               <div className="flex justify-end space-x-2">
                 <button
-                  onClick={() => handleEdit(brand)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent navigation when clicking buttons
+                    handleEdit(brand);
+                  }}
                   className="p-2 text-blue-600 hover:text-blue-900"
                 >
                   <Edit2 className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => handleDelete(brand.id!)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent navigation when clicking buttons
+                    handleDelete(brand.id!);
+                  }}
                   className="p-2 text-red-600 hover:text-red-900"
                 >
                   <Trash2 className="w-5 h-5" />
