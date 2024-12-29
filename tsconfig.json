@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    /* Base Options: */
+    "target": "ESNext", // Use modern JavaScript features
+    "module": "ESNext", // Optimize for modern bundlers (e.g., Vite, Webpack)
+    "lib": ["dom", "dom.iterable", "ESNext"], // Include DOM APIs and latest ECMAScript features
+    "jsx": "react-jsx", // Enable React's modern JSX runtime
+    "resolveJsonModule": true, // Allow importing JSON files
+    "allowJs": true, // Allow JavaScript files in the project
+    "esModuleInterop": true, // Improve CommonJS compatibility
+    "skipLibCheck": true, // Skip type checking in `node_modules` for faster builds
+    "isolatedModules": true, // Ensure independent file transpilation
+
+    /* Strictness: */
+    "strict": true, // Enable all strict type checking options
+    "noUncheckedIndexedAccess": true, // Catch potential `undefined` in object properties
+    "forceConsistentCasingInFileNames": true, // Enforce consistent file naming
+
+    /* Module Resolution: */
+    "moduleResolution": "node", // Use Node.js module resolution
+    "baseUrl": ".", // Enable absolute imports relative to the project root
+    "paths": {
+      // Define custom import aliases
+      "@/*": ["./src/*"]
+    },
+
+    /* Output Settings: */
+    "noEmit": true, // Do not generate output files during type checking
+    "incremental": true // Enable incremental builds for faster checks
+  },
+  "include": ["src/**/*"], // Include all files in the `src` folder
+  "exclude": ["node_modules", "dist"] // Exclude `node_modules` and build output
+}
