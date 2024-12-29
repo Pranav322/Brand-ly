@@ -12,11 +12,16 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PrivateRoute } from "./components/PrivateRoute";
+import { BrandDetailPage } from "./pages/BrandDetailPage";
+import { ProductDetailPage } from "./pages/ProductDetailPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <Toaster position="top-right" />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -27,7 +32,16 @@ function App() {
                 <Layout>
                   <Routes>
                     <Route path="/products" element={<ProductsPage />} />
+                    <Route
+                      path="/products/:productId"
+                      element={<ProductDetailPage />}
+                    />
                     <Route path="/brands" element={<BrandsPage />} />
+                    <Route
+                      path="/brands/:brandId"
+                      element={<BrandDetailPage />}
+                    />
+                    <Route path="/profile" element={<ProfilePage />} />
                     <Route
                       path="/"
                       element={<Navigate to="/products" replace />}
