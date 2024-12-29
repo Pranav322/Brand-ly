@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutGrid,
@@ -6,8 +6,8 @@ import {
   Users,
   ShoppingCart,
   Settings,
-  LogOut,
   Search,
+  ChevronDown,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -17,7 +17,44 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, currentUser } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    }
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // Get user initials for avatar placeholder
+  const getInitials = () => {
+    if (currentUser?.displayName) {
+      return currentUser.displayName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase();
+    }
+    return currentUser?.email?.[0].toUpperCase() || "U";
+  };
+
+  // Reset image error state when user changes
+  useEffect(() => {
+    setImageError(false);
+  }, [currentUser?.photoURL]);
+  // Get user's photo URL from either Google auth or custom profile
+  // const getUserPhotoUrl = () => {
+  //   if (currentUser?.photoURL && currentUser.photoURL !== "") {
+  //     return currentUser.photoURL;
+  //   }
+  //   return null;
+  // };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -59,9 +96,7 @@ export function Layout({ children }: LayoutProps) {
             <ShoppingCart className="w-5 h-5 mr-3" />
             Orders
           </button>
-        </nav>
 
-        <div className="mt-auto pt-8">
           <button
             onClick={() => navigate("/settings")}
             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
@@ -69,15 +104,7 @@ export function Layout({ children }: LayoutProps) {
             <Settings className="w-5 h-5 mr-3" />
             Settings
           </button>
-
-          <button
-            onClick={() => logout().then(() => navigate("/login"))}
-            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
-          >
-            <LogOut className="w-5 h-5 mr-3" />
-            Logout
-          </button>
-        </div>
+        </nav>
       </div>
 
       {/* Main Content */}
@@ -93,20 +120,52 @@ export function Layout({ children }: LayoutProps) {
               />
             </div>
 
-            <div className="flex items-center space-x-4">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                Add New
-              </button>
-              <div className="flex items-center space-x-2">
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt="Profile"
-                  className="w-8 h-8 rounded-full"
-                />
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center space-x-3 focus:outline-none"
+              >
+                {currentUser?.photoURL && !imageError ? (
+                  <img
+                    src={currentUser.photoURL}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-sm">
+                    {getInitials()}
+                  </div>
+                )}
                 <span className="text-sm font-medium text-gray-700">
-                  John Doe
+                  {currentUser?.displayName || currentUser?.email}
                 </span>
-              </div>
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                  <button
+                    onClick={() => {
+                      navigate("/profile");
+                      setShowProfileMenu(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    My Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      logout().then(() => navigate("/login"));
+                      setShowProfileMenu(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
