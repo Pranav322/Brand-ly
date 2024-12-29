@@ -1,0 +1,50 @@
+name: CI
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  run-ci:
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    name: Run Type Check & Linters
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: "npm"
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm  # Cache npm dependencies
+          key: ${{ runner.os }}-react-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-react-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Install dependencies
+        run: npm install --frozen-lockfile
+
+      - name: Check types
+        run: npm run type-check
+
+      - name: Check Prettier
+        run: npm run format:ci
+
+      - name: Check linting
+        run: npm run lint
+
+      - name: Check commit messages
+        uses: wagoid/commitlint-github-action@v6
