@@ -1,26 +1,23 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  LayoutGrid,
-  Package,
-  Users,
-  ShoppingCart,
-  Settings,
-  Search,
-  ChevronDown,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { LayoutGrid, Package, Users, ChevronDown, LogOut } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { SearchInput } from "./SearchInput";
+import { useRef } from "react";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
-  const navigate = useNavigate();
-  const { logout, currentUser } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [imageError, setImageError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, currentUser } = useAuth();
+
   // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -57,17 +54,30 @@ export function Layout({ children }: LayoutProps) {
   // };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-light-background dark:bg-dark-background">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 px-4 py-6">
+      <div className="w-64 bg-light-surface dark:bg-dark-surface border-r border-light-border dark:border-dark-border px-4 py-6">
         <div className="flex items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">BrandManager</h1>
+          <h1 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary font-display">
+            BrandLy
+          </h1>
+        </div>
+
+        <div className="mb-6 w-full">
+          <SearchInput />
         </div>
 
         <nav className="space-y-1">
           <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
+            onClick={() => {
+              navigate("/dashboard");
+            }}
+            className={`flex items-center px-4 py-2 rounded-lg w-full
+              ${
+                location.pathname === "/dashboard"
+                  ? "bg-light-primary/10 dark:bg-dark-primary/10 text-light-primary dark:text-dark-primary"
+                  : "text-light-text-secondary dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800"
+              }`}
           >
             <LayoutGrid className="w-5 h-5 mr-3" />
             Dashboard
@@ -75,7 +85,12 @@ export function Layout({ children }: LayoutProps) {
 
           <button
             onClick={() => navigate("/products")}
-            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
+            className={`flex items-center px-4 py-2 rounded-lg w-full
+              ${
+                location.pathname === "/products"
+                  ? "bg-light-primary/10 dark:bg-dark-primary/10 text-light-primary dark:text-dark-primary"
+                  : "text-light-text-secondary dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800"
+              }`}
           >
             <Package className="w-5 h-5 mr-3" />
             Products
@@ -83,43 +98,52 @@ export function Layout({ children }: LayoutProps) {
 
           <button
             onClick={() => navigate("/brands")}
-            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
+            className={`flex items-center px-4 py-2 rounded-lg w-full
+              ${
+                location.pathname === "/brands"
+                  ? "bg-light-primary/10 dark:bg-dark-primary/10 text-light-primary dark:text-dark-primary"
+                  : "text-light-text-secondary dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800"
+              }`}
           >
             <Users className="w-5 h-5 mr-3" />
             Brands
           </button>
 
-          <button
+          {/* turns out they are of no use but they mighht be of any use later so they are here */}
+          {/* <button
             onClick={() => navigate("/orders")}
             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
           >
             <ShoppingCart className="w-5 h-5 mr-3" />
             Orders
-          </button>
+          </button> */}
 
-          <button
+          {/* <button
             onClick={() => navigate("/settings")}
             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
           >
             <Settings className="w-5 h-5 mr-3" />
             Settings
-          </button>
+          </button> */}
         </nav>
+
+        <div className="mt-auto pt-6">
+          <button
+            onClick={logout}
+            className="flex items-center px-4 py-2 rounded-lg w-full
+              text-light-text-secondary dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            <LogOut className="w-5 h-5 mr-3" />
+            Sign Out
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <header className="bg-white border-b border-gray-200 px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="relative w-96">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search products, brands..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
+        <header className="bg-light-surface dark:bg-dark-surface border-b border-light-border dark:border-dark-border px-8 py-4">
+          <div className="flex justify-end items-center space-x-4">
+            <ThemeSwitcher />
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
