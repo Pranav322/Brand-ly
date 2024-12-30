@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit2, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit2, Trash2, Building, Package } from "lucide-react";
 import { useFirestore } from "../hooks/useFirestore";
 import { Brand, Product } from "../types";
 import { BrandModal } from "../components/BrandModal";
@@ -42,18 +42,26 @@ export function BrandDetailPage() {
 
   if (brandLoading || productsLoading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-primary dark:border-dark-primary"></div>
       </div>
     );
   }
 
   if (brandError || productsError) {
-    return <div className="text-red-600 p-4">Error loading data</div>;
+    return (
+      <div className="text-red-600 dark:text-red-400 p-4">
+        Error: {brandError || productsError}
+      </div>
+    );
   }
 
   if (!brand) {
-    return <div className="text-gray-600 p-4">Brand not found</div>;
+    return (
+      <div className="text-light-text-secondary dark:text-dark-text-secondary p-4">
+        Brand not found
+      </div>
+    );
   }
 
   return (
@@ -61,39 +69,51 @@ export function BrandDetailPage() {
       <div className="mb-6">
         <button
           onClick={() => navigate("/brands")}
-          className="flex items-center text-gray-600 hover:text-gray-900"
+          className="flex items-center text-light-text-secondary dark:text-dark-text-secondary 
+                   hover:text-light-text-primary dark:hover:text-dark-text-primary"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
           Back to Brands
         </button>
       </div>
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="bg-light-surface dark:bg-dark-surface shadow dark:shadow-gray-800 rounded-lg overflow-hidden">
         <div className="p-6">
           <div className="flex justify-between items-start">
             <div className="flex items-center">
-              <img
-                src={brand.logoUrl}
-                alt={brand.name}
-                className="h-24 w-24 rounded-lg object-cover"
-              />
+              <div
+                className="h-24 w-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 
+                            flex items-center justify-center"
+              >
+                {brand.logoUrl ? (
+                  <img
+                    src={brand.logoUrl}
+                    alt={brand.name}
+                    className="w-full h-full object-contain p-2"
+                  />
+                ) : (
+                  <Building className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                )}
+              </div>
               <div className="ml-6">
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-light-text-primary dark:text-dark-text-primary font-display">
                   {brand.name}
                 </h1>
-                <p className="mt-2 text-gray-600">{brand.description}</p>
+                <p className="mt-2 text-light-text-secondary dark:text-dark-text-secondary">
+                  {brand.description}
+                </p>
               </div>
             </div>
             <div className="flex space-x-4">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="p-2 text-blue-600 hover:text-blue-900"
+                className="p-2 text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
               >
                 <Edit2 className="w-5 h-5" />
               </button>
               <button
                 onClick={handleDelete}
-                className="p-2 text-red-600 hover:text-red-900"
+                className="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -109,20 +129,30 @@ export function BrandDetailPage() {
                 <div
                   key={product.id}
                   onClick={() => navigate(`/products/${product.id}`)}
-                  className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 cursor-pointer"
+                  className="bg-light-surface dark:bg-dark-surface rounded-lg p-4 
+                             hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
                 >
                   <div className="flex items-center">
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="h-16 w-16 rounded object-cover"
-                    />
+                    <div
+                      className="h-16 w-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 
+                                  flex items-center justify-center"
+                    >
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-contain p-2"
+                        />
+                      ) : (
+                        <Package className="w-6 h-6 text-gray-400 dark:text-gray-500" />
+                      )}
+                    </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900">
+                      <h3 className="text-lg font-medium text-light-text-primary dark:text-dark-text-primary">
                         {product.name}
                       </h3>
-                      <p className="text-sm text-gray-600">
-                        ${product.price.toFixed(2)}
+                      <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+                        ${Number(product.price).toFixed(2)}
                       </p>
                     </div>
                   </div>

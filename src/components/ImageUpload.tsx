@@ -1,36 +1,28 @@
-import React, { useState } from "react";
-import { Upload, X, Link as LinkIcon } from "lucide-react";
-import { storage } from "../firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { useState } from "react";
+import { Upload, X } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 interface ImageUploadProps {
   currentImage?: string;
   onImageUploaded: (url: string) => void;
-  folder: "brands" | "products";
 }
 
 export function ImageUpload({
   currentImage,
   onImageUploaded,
-  folder,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [urlInput, setUrlInput] = useState("");
-  const [showUrlInput, setShowUrlInput] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("File size must be less than 5MB");
       return;
@@ -38,36 +30,38 @@ export function ImageUpload({
 
     try {
       setUploading(true);
-
-      // Create unique filename
-      const fileName = `${Date.now()}-${file.name}`;
-      const storageRef = ref(storage, `${folder}/${fileName}`);
-
-      // Upload new image
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setProgress(progress);
-        },
-        (error) => {
-          console.error("Upload error:", error);
-          toast.error("Failed to upload image");
-          setUploading(false);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(storageRef);
-          onImageUploaded(downloadURL);
-          setUploading(false);
-          toast.success("Image uploaded successfully!");
-        },
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append(
+        "upload_preset",
+        import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
       );
+
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
+
+      const response = await fetch(uploadUrl, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Upload failed");
+      }
+
+      const data = await response.json();
+
+      if (data.secure_url) {
+        onImageUploaded(data.secure_url);
+        toast.success("Image uploaded successfully!");
+      }
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload image");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to upload image",
+      );
+    } finally {
       setUploading(false);
     }
   };
@@ -76,112 +70,80 @@ export function ImageUpload({
     e.preventDefault();
     if (!urlInput) return;
 
-    // Basic URL validation
     try {
       new URL(urlInput);
       onImageUploaded(urlInput);
       setUrlInput("");
-      setShowUrlInput(false);
       toast.success("Image URL added successfully!");
     } catch (error) {
       toast.error("Please enter a valid URL");
-      console.error("URL validation error:", error);
+      console.log(error);
     }
   };
 
   return (
     <div className="space-y-4">
-      {currentImage && (
+      {currentImage ? (
         <div className="relative w-full h-48">
           <img
             src={currentImage}
             alt="Preview"
-            className="w-full h-full object-cover rounded-lg"
+            className="w-full h-full object-contain rounded-lg bg-gray-50 dark:bg-gray-800"
           />
-          {!uploading && (
-            <button
-              onClick={() => onImageUploaded("")}
-              className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+          <button
+            onClick={() => onImageUploaded("")}
+            className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full 
+                     hover:bg-red-700 dark:hover:bg-red-500"
+            title="Remove image"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-      )}
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-center w-full">
+            <label
+              className="w-full flex flex-col items-center px-4 py-6 bg-light-surface dark:bg-dark-surface 
+                           text-light-primary dark:text-dark-primary rounded-lg shadow-lg tracking-wide 
+                           border border-light-border dark:border-dark-border cursor-pointer 
+                           hover:bg-light-primary/10 dark:hover:bg-dark-primary/10"
+            >
+              <Upload className="w-8 h-8" />
+              <span className="mt-2 text-base">
+                {uploading ? "Uploading..." : "Select an image"}
+              </span>
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+                disabled={uploading}
+              />
+            </label>
+          </div>
 
-      {showUrlInput ? (
-        <form onSubmit={handleUrlSubmit} className="space-y-2">
-          <div className="flex gap-2">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-light-border dark:border-dark-border" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-light-surface dark:bg-dark-surface text-light-text-secondary dark:text-dark-text-secondary">
+                Or
+              </span>
+            </div>
+          </div>
+
+          <form onSubmit={handleUrlSubmit} className="flex space-x-2">
             <input
               type="url"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder="Enter image URL..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-3 py-2 rounded-lg border border-light-border dark:border-dark-border 
+                       bg-light-surface dark:bg-dark-surface text-light-text-primary dark:text-dark-text-primary
+                       focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary"
             />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Add
-            </button>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowUrlInput(false)}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
-            Or upload an image instead
-          </button>
-        </form>
-      ) : (
-        <div className="space-y-2">
-          <div className="relative">
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept="image/*"
-              className="hidden"
-              id="image-upload"
-              disabled={uploading}
-            />
-            <label
-              htmlFor="image-upload"
-              className={`flex items-center justify-center w-full p-4 border-2 border-dashed rounded-lg cursor-pointer
-                ${uploading ? "bg-gray-100 border-gray-300" : "border-blue-300 hover:border-blue-400"}
-              `}
-            >
-              <div className="text-center">
-                <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                <p className="mt-1 text-sm text-gray-500">
-                  {uploading
-                    ? `Uploading... ${progress.toFixed(0)}%`
-                    : "Click to upload an image"}
-                </p>
-                <p className="mt-1 text-xs text-gray-400">
-                  PNG, JPG, GIF up to 5MB
-                </p>
-              </div>
-            </label>
-
-            {uploading && (
-              <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-600 transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setShowUrlInput(true)}
-            className="flex items-center text-sm text-gray-500 hover:text-gray-700"
-          >
-            <LinkIcon className="w-4 h-4 mr-1" />
-            Or use an image URL instead
-          </button>
+          </form>
         </div>
       )}
     </div>
