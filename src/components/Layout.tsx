@@ -1,26 +1,31 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutGrid,
   Package,
   Users,
-  ShoppingCart,
-  Settings,
-  Search,
   ChevronDown,
+  LogOut,
+  Menu,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { SearchInput } from "./SearchInput";
+import { useRef } from "react";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
-  const navigate = useNavigate();
-  const { logout, currentUser } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [imageError, setImageError] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, currentUser } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -57,17 +62,46 @@ export function Layout({ children }: LayoutProps) {
   // };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-light-background dark:bg-dark-background">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 px-4 py-6">
+      <div
+        className={`
+        fixed inset-y-0 left-0 z-30 w-64 bg-light-surface dark:bg-dark-surface 
+        border-r border-light-border dark:border-dark-border px-4 py-6
+        transform transition-transform duration-200 ease-in-out
+        lg:relative lg:translate-x-0
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      `}
+      >
         <div className="flex items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">BrandManager</h1>
+          <h1 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary font-display">
+            BrandLy
+          </h1>
+        </div>
+
+        <div className="mb-6 w-full">
+          <SearchInput />
         </div>
 
         <nav className="space-y-1">
           <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
+            onClick={() => {
+              navigate("/dashboard");
+            }}
+            className={`flex items-center px-4 py-2 rounded-lg w-full
+              ${
+                location.pathname === "/dashboard"
+                  ? "bg-light-primary/10 dark:bg-dark-primary/10 text-light-primary dark:text-dark-primary"
+                  : "text-light-text-secondary dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800"
+              }`}
           >
             <LayoutGrid className="w-5 h-5 mr-3" />
             Dashboard
@@ -75,7 +109,12 @@ export function Layout({ children }: LayoutProps) {
 
           <button
             onClick={() => navigate("/products")}
-            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
+            className={`flex items-center px-4 py-2 rounded-lg w-full
+              ${
+                location.pathname === "/products"
+                  ? "bg-light-primary/10 dark:bg-dark-primary/10 text-light-primary dark:text-dark-primary"
+                  : "text-light-text-secondary dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800"
+              }`}
           >
             <Package className="w-5 h-5 mr-3" />
             Products
@@ -83,94 +122,112 @@ export function Layout({ children }: LayoutProps) {
 
           <button
             onClick={() => navigate("/brands")}
-            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
+            className={`flex items-center px-4 py-2 rounded-lg w-full
+              ${
+                location.pathname === "/brands"
+                  ? "bg-light-primary/10 dark:bg-dark-primary/10 text-light-primary dark:text-dark-primary"
+                  : "text-light-text-secondary dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800"
+              }`}
           >
             <Users className="w-5 h-5 mr-3" />
             Brands
           </button>
 
-          <button
+          {/* turns out they are of no use but they mighht be of any use later so they are here */}
+          {/* <button
             onClick={() => navigate("/orders")}
             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
           >
             <ShoppingCart className="w-5 h-5 mr-3" />
             Orders
-          </button>
+          </button> */}
 
-          <button
+          {/* <button
             onClick={() => navigate("/settings")}
             className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg w-full"
           >
             <Settings className="w-5 h-5 mr-3" />
             Settings
-          </button>
+          </button> */}
         </nav>
+
+        <div className="mt-auto pt-6">
+          <button
+            onClick={logout}
+            className="flex items-center px-4 py-2 rounded-lg w-full
+              text-light-text-secondary dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            <LogOut className="w-5 h-5 mr-3" />
+            Sign Out
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <header className="bg-white border-b border-gray-200 px-8 py-4">
+      <div className="flex-1 overflow-auto w-full">
+        <header className="bg-light-surface dark:bg-dark-surface border-b border-light-border dark:border-dark-border px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="relative w-96">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search products, brands..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 lg:hidden"
+            >
+              <Menu className="w-6 h-6 text-light-text-secondary dark:text-dark-text-secondary" />
+            </button>
 
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center space-x-3 focus:outline-none"
-              >
-                {currentUser?.photoURL && !imageError ? (
-                  <img
-                    src={currentUser.photoURL}
-                    alt="Profile"
-                    className="w-8 h-8 rounded-full object-cover"
-                    onError={() => setImageError(true)}
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-sm">
-                    {getInitials()}
+            <div className="flex justify-end items-center space-x-4 ml-auto">
+              <ThemeSwitcher />
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center space-x-3 focus:outline-none"
+                >
+                  {currentUser?.photoURL && !imageError ? (
+                    <img
+                      src={currentUser.photoURL}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-full object-cover"
+                      onError={() => setImageError(true)}
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-sm">
+                      {getInitials()}
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-gray-700">
+                    {currentUser?.displayName || currentUser?.email}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                </button>
+
+                {/* Profile Dropdown Menu */}
+                {showProfileMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                    <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setShowProfileMenu(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      My Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        logout().then(() => navigate("/login"));
+                        setShowProfileMenu(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-700">
-                  {currentUser?.displayName || currentUser?.email}
-                </span>
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              </button>
-
-              {/* Profile Dropdown Menu */}
-              {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                  <button
-                    onClick={() => {
-                      navigate("/profile");
-                      setShowProfileMenu(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    My Profile
-                  </button>
-                  <button
-                    onClick={() => {
-                      logout().then(() => navigate("/login"));
-                      setShowProfileMenu(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </header>
 
-        <main className="p-8">{children}</main>
+        <main className="p-4 lg:p-8">{children}</main>
       </div>
     </div>
   );

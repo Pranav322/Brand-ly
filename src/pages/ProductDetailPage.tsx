@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit2, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit2, Trash2, Package } from "lucide-react";
 import { useFirestore } from "../hooks/useFirestore";
 import { Product, Brand } from "../types";
 import { ProductModal } from "../components/ProductModal";
@@ -17,14 +17,11 @@ export function ProductDetailPage() {
     deleteDocument,
   } = useFirestore<Product>("products");
 
-  const {
-    data: brands,
-    loading: brandLoading,
-    error: brandError,
-  } = useFirestore<Brand>("brands");
+  const { loading: brandLoading, error: brandError } =
+    useFirestore<Brand>("brands");
 
   const product = products.find((p) => p.id === productId);
-  const brand = brands.find((b) => b.id === product?.brandId);
+  // const brand = brands.find((b) => b.id === product?.brandId);
 
   const handleDelete = async () => {
     if (!productId) return;
@@ -37,18 +34,26 @@ export function ProductDetailPage() {
 
   if (productLoading || brandLoading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-primary dark:border-dark-primary"></div>
       </div>
     );
   }
 
   if (productError || brandError) {
-    return <div className="text-red-600 p-4">Error loading data</div>;
+    return (
+      <div className="text-red-600 dark:text-red-400 p-4">
+        Error: {productError || brandError}
+      </div>
+    );
   }
 
   if (!product) {
-    return <div className="text-gray-600 p-4">Product not found</div>;
+    return (
+      <div className="text-light-text-secondary dark:text-dark-text-secondary p-4">
+        Product not found
+      </div>
+    );
   }
 
   return (
@@ -56,73 +61,67 @@ export function ProductDetailPage() {
       <div className="mb-6">
         <button
           onClick={() => navigate("/products")}
-          className="flex items-center text-gray-600 hover:text-gray-900"
+          className="flex items-center text-light-text-secondary dark:text-dark-text-secondary 
+                   hover:text-light-text-primary dark:hover:text-dark-text-primary"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
           Back to Products
         </button>
       </div>
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="bg-light-surface dark:bg-dark-surface shadow dark:shadow-gray-800 rounded-lg overflow-hidden">
         <div className="p-6">
-          <div className="flex justify-between">
-            <div className="flex-1">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="h-48 w-48 rounded-lg object-cover"
-                  />
-                </div>
-                <div className="ml-6">
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    {product.name}
-                  </h1>
-                  <div className="mt-2">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                      {product.category}
-                    </span>
-                  </div>
-                  <p className="mt-4 text-gray-600">{product.description}</p>
-                  <div className="mt-4">
-                    <div className="text-2xl font-bold text-gray-900">
-                      ${product.price.toFixed(2)}
-                    </div>
-                    <div className="mt-1 text-sm text-gray-500">
-                      {product.stock} in stock
-                    </div>
-                  </div>
-                  {brand && (
-                    <div className="mt-6">
-                      <div className="text-sm font-medium text-gray-500">
-                        Brand
-                      </div>
-                      <div className="mt-1 flex items-center">
-                        <img
-                          src={brand.logoUrl}
-                          alt={brand.name}
-                          className="h-8 w-8 rounded-full"
-                        />
-                        <div className="ml-2 text-sm font-medium text-gray-900">
-                          {brand.name}
-                        </div>
-                      </div>
-                    </div>
+          <div className="flex justify-between items-start">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
+              <div className="w-24 h-24 flex-shrink-0">
+                <div
+                  className="h-24 w-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 
+                              flex items-center justify-center"
+                >
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-contain p-2"
+                    />
+                  ) : (
+                    <Package className="w-8 h-8 text-gray-400 dark:text-gray-500" />
                   )}
+                </div>
+              </div>
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-light-text-primary dark:text-dark-text-primary font-display">
+                  {product.name}
+                </h1>
+                <p className="mt-2 text-light-text-secondary dark:text-dark-text-secondary">
+                  {product.description}
+                </p>
+                <div className="mt-4 flex items-center space-x-4">
+                  <span
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                  >
+                    {product.category}
+                  </span>
+                  <span className="text-light-text-primary dark:text-dark-text-primary font-semibold">
+                    ${product.price}
+                  </span>
+                  <span className="text-light-text-secondary dark:text-dark-text-secondary">
+                    Stock: {product.stock}
+                  </span>
                 </div>
               </div>
             </div>
             <div className="flex space-x-4">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="p-2 text-blue-600 hover:text-blue-900"
+                className="p-2 text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
               >
                 <Edit2 className="w-5 h-5" />
               </button>
               <button
                 onClick={handleDelete}
-                className="p-2 text-red-600 hover:text-red-900"
+                className="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -137,7 +136,7 @@ export function ProductDetailPage() {
         product={product}
         onSuccess={() => {
           setIsModalOpen(false);
-          navigate(0); // Refresh the page
+          refreshData();
         }}
       />
     </div>

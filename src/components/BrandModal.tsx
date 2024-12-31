@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { Brand } from "../types";
 import { useFirestore } from "../hooks/useFirestore";
 import { ImageUpload } from "./ImageUpload";
+import { toast } from "react-hot-toast";
+import { Modal } from "./Modal";
 
 interface BrandModalProps {
   isOpen: boolean;
@@ -17,110 +18,118 @@ export function BrandModal({
   brand,
   onSuccess,
 }: BrandModalProps) {
-  const [formData, setFormData] = useState<Omit<Brand, "id">>({
-    name: "",
-    description: "",
-    logoUrl: "",
-  });
+  const [name, setName] = useState(brand?.name || "");
+  const [description, setDescription] = useState(brand?.description || "");
+  const [logo, setLogo] = useState(brand?.logoUrl || "");
   const { addDocument, updateDocument } = useFirestore<Brand>("brands");
 
   useEffect(() => {
     if (brand) {
-      setFormData(brand);
+      setName(brand.name);
+      setDescription(brand.description);
+      setLogo(brand.logoUrl);
     }
   }, [brand]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
+      const brandData = {
+        name,
+        description,
+        logoUrl: logo,
+      };
+
       if (brand?.id) {
-        await updateDocument(brand.id, formData);
+        await updateDocument(brand.id, brandData);
       } else {
-        await addDocument(formData);
+        await addDocument(brandData);
       }
+
+      toast.success(`Brand ${brand ? "updated" : "added"} successfully!`);
       onSuccess();
-      onClose();
     } catch (error) {
       console.error("Error saving brand:", error);
+      toast.error("Failed to save brand");
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-8 max-w-md w-full">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">
-            {brand ? "Edit Brand" : "Add New Brand"}
-          </h2>
-          <button onClick={onClose}>
-            <X className="w-6 h-6" />
-          </button>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <div className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl w-[400px] mx-auto">
+        <div className="px-6 py-4 border-b border-light-border dark:border-dark-border">
+          <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary font-display">
+            {brand ? "Edit Brand" : "Add Brand"}
+          </h3>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="p-6">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-light-border dark:border-dark-border 
+                         bg-light-surface dark:bg-dark-surface text-light-text-primary dark:text-dark-text-primary
+                         focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary"
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              required
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">
+                Description
+              </label>
+              <textarea
+                name="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg border border-light-border dark:border-dark-border 
+                         bg-light-surface dark:bg-dark-surface text-light-text-primary dark:text-dark-text-primary
+                         focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Logo
-            </label>
-            <div className="mt-1">
+            <div>
+              <label className="block text-sm font-medium text-light-text-secondary dark:text-dark-text-secondary mb-1">
+                Logo
+              </label>
               <ImageUpload
-                currentImage={formData.logoUrl}
-                onImageUploaded={(url) =>
-                  setFormData({ ...formData, logoUrl: url })
-                }
+                currentImage={logo}
+                onImageUploaded={setLogo}
                 folder="brands"
               />
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 mt-6">
+          <div className="mt-6 flex justify-end space-x-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 text-light-text-secondary dark:text-dark-text-secondary 
+                       hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+              className="px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-lg 
+                       hover:bg-light-primary/90 dark:hover:bg-dark-primary/90"
             >
-              {brand ? "Update" : "Add"} Brand
+              {brand ? "Save Changes" : "Add Brand"}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }
