@@ -72,22 +72,24 @@ export function ProductDetailPage() {
       <div className="bg-light-surface dark:bg-dark-surface shadow dark:shadow-gray-800 rounded-lg overflow-hidden">
         <div className="p-6">
           <div className="flex justify-between items-start">
-            <div className="flex items-center">
-              <div
-                className="h-24 w-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 
-                            flex items-center justify-center"
-              >
-                {product.imageUrl ? (
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-contain p-2"
-                  />
-                ) : (
-                  <Package className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-                )}
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
+              <div className="w-24 h-24 flex-shrink-0">
+                <div
+                  className="h-24 w-24 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 
+                              flex items-center justify-center"
+                >
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-contain p-2"
+                    />
+                  ) : (
+                    <Package className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                  )}
+                </div>
               </div>
-              <div className="ml-6">
+              <div className="flex-1">
                 <h1 className="text-3xl font-bold text-light-text-primary dark:text-dark-text-primary font-display">
                   {product.name}
                 </h1>

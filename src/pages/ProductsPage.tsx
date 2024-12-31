@@ -78,20 +78,22 @@ export function ProductsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary font-display">
           Products
         </h1>
-        <div className="flex space-x-4">
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
           <PageSearchInput
             value={searchTerm}
             onChange={setSearchTerm}
             placeholder="Search products..."
+            className="w-full sm:w-64"
           />
           <button
             onClick={handleAdd}
             className="px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-lg 
-                     hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 flex items-center"
+                     hover:bg-light-primary/90 dark:hover:bg-dark-primary/90 flex items-center 
+                     justify-center sm:justify-start whitespace-nowrap"
           >
             <Package className="w-5 h-5 mr-2" />
             Add Product
@@ -100,104 +102,108 @@ export function ProductsPage() {
       </div>
 
       <div className="bg-light-surface dark:bg-dark-surface rounded-lg shadow dark:shadow-gray-800 overflow-hidden">
-        <table className="min-w-full divide-y divide-light-border dark:divide-dark-border">
-          <thead className="bg-gray-50 dark:bg-gray-800">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
-                Product
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
-                Brand
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
-                Category
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
-                Price
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
-                Stock
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-light-border dark:divide-dark-border">
-            {filteredProducts.map((product) => (
-              <tr
-                key={product.id}
-                onClick={() => navigate(`/products/${product.id}`)}
-                className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="h-10 w-10 flex-shrink-0 rounded overflow-hidden bg-gray-100 dark:bg-gray-800">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="h-10 w-10 object-contain"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 flex items-center justify-center">
-                          <Package className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+        <div className="overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <table className="min-w-full divide-y divide-light-border dark:divide-dark-border">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
+                    Product
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
+                    Brand
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
+                    Price
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-light-text-secondary dark:text-dark-text-secondary uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-light-border dark:divide-dark-border">
+                {filteredProducts.map((product) => (
+                  <tr
+                    key={product.id}
+                    onClick={() => navigate(`/products/${product.id}`)}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 flex-shrink-0 rounded overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          {product.imageUrl ? (
+                            <img
+                              src={product.imageUrl}
+                              alt={product.name}
+                              className="h-10 w-10 object-contain"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 flex items-center justify-center">
+                              <Package className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-light-text-primary dark:text-dark-text-primary">
-                        {product.name}
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-light-text-primary dark:text-dark-text-primary">
+                            {product.name}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-                    {getBrandName(product.brandId)}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-                    {product.category}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-                    ${Number(product.price).toFixed(2)}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-                    {product.stock}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(product);
-                      }}
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(product.id!);
-                      }}
-                      className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+                        {getBrandName(product.brandId)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+                        {product.category}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+                        ${Number(product.price).toFixed(2)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+                        {product.stock}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(product);
+                          }}
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                        >
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(product.id!);
+                          }}
+                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <ProductModal

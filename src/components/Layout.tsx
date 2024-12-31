@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LayoutGrid, Package, Users, ChevronDown, LogOut } from "lucide-react";
+import {
+  LayoutGrid,
+  Package,
+  Users,
+  ChevronDown,
+  LogOut,
+  Menu,
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { SearchInput } from "./SearchInput";
 import { useRef } from "react";
@@ -17,6 +24,7 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, currentUser } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -55,8 +63,24 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="flex h-screen bg-light-background dark:bg-dark-background">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 bg-light-surface dark:bg-dark-surface border-r border-light-border dark:border-dark-border px-4 py-6">
+      <div
+        className={`
+        fixed inset-y-0 left-0 z-30 w-64 bg-light-surface dark:bg-dark-surface 
+        border-r border-light-border dark:border-dark-border px-4 py-6
+        transform transition-transform duration-200 ease-in-out
+        lg:relative lg:translate-x-0
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      `}
+      >
         <div className="flex items-center mb-8">
           <h1 className="text-2xl font-bold text-light-text-primary dark:text-dark-text-primary font-display">
             BrandLy
@@ -140,61 +164,70 @@ export function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <header className="bg-light-surface dark:bg-dark-surface border-b border-light-border dark:border-dark-border px-8 py-4">
-          <div className="flex justify-end items-center space-x-4">
-            <ThemeSwitcher />
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center space-x-3 focus:outline-none"
-              >
-                {currentUser?.photoURL && !imageError ? (
-                  <img
-                    src={currentUser.photoURL}
-                    alt="Profile"
-                    className="w-8 h-8 rounded-full object-cover"
-                    onError={() => setImageError(true)}
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-sm">
-                    {getInitials()}
+      <div className="flex-1 overflow-auto w-full">
+        <header className="bg-light-surface dark:bg-dark-surface border-b border-light-border dark:border-dark-border px-4 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 lg:hidden"
+            >
+              <Menu className="w-6 h-6 text-light-text-secondary dark:text-dark-text-secondary" />
+            </button>
+
+            <div className="flex justify-end items-center space-x-4">
+              <ThemeSwitcher />
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center space-x-3 focus:outline-none"
+                >
+                  {currentUser?.photoURL && !imageError ? (
+                    <img
+                      src={currentUser.photoURL}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-full object-cover"
+                      onError={() => setImageError(true)}
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-sm">
+                      {getInitials()}
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-gray-700">
+                    {currentUser?.displayName || currentUser?.email}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                </button>
+
+                {/* Profile Dropdown Menu */}
+                {showProfileMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                    <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setShowProfileMenu(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      My Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        logout().then(() => navigate("/login"));
+                        setShowProfileMenu(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-700">
-                  {currentUser?.displayName || currentUser?.email}
-                </span>
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              </button>
-
-              {/* Profile Dropdown Menu */}
-              {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                  <button
-                    onClick={() => {
-                      navigate("/profile");
-                      setShowProfileMenu(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    My Profile
-                  </button>
-                  <button
-                    onClick={() => {
-                      logout().then(() => navigate("/login"));
-                      setShowProfileMenu(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </header>
 
-        <main className="p-8">{children}</main>
+        <main className="p-4 lg:p-8">{children}</main>
       </div>
     </div>
   );
