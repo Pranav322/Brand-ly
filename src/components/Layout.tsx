@@ -174,7 +174,7 @@ export function Layout({ children }: LayoutProps) {
               <Menu className="w-6 h-6 text-light-text-secondary dark:text-dark-text-secondary" />
             </button>
 
-            <div className="flex justify-end items-center space-x-4">
+            <div className="flex justify-end items-center space-x-4 ml-auto">
               <ThemeSwitcher />
               <div className="relative" ref={menuRef}>
                 <button
