@@ -91,4 +91,4 @@ This starter uses npm by default, but this choice is yours. If you'd like to swi
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for more information.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for more information..
