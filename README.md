@@ -1,7 +1,5 @@
 # Brandly
 
-# BrandLy
-
 A brand and product management system built with React, TypeScript, and Firebase.
 
 ### Features
