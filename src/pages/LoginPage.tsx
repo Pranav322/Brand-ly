@@ -24,7 +24,7 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-light-background dark:bg-dark-background">
       <div className="max-w-md w-full p-6 bg-light-surface dark:bg-dark-surface rounded-lg shadow-xl">
         <h2 className="text-3xl font-bold text-center mb-8 text-light-text-primary dark:text-dark-text-primary font-display">
-          BrandManager
+          BrandLy
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

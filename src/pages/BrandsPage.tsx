@@ -93,15 +93,16 @@ export function BrandsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         {filteredBrands.map((brand) => (
           <div
             key={brand.id}
             className="bg-light-surface dark:bg-dark-surface rounded-lg shadow-md dark:shadow-gray-800 
-                     overflow-hidden cursor-pointer hover:shadow-lg dark:hover:shadow-gray-700 transition-shadow"
+                     overflow-hidden cursor-pointer hover:shadow-lg dark:hover:shadow-gray-700 
+                     transition-shadow flex flex-col h-full"
             onClick={() => navigate(`/brands/${brand.id}`)}
           >
-            <div className="h-48 w-full relative bg-gray-100 dark:bg-gray-800 rounded-t-lg">
+            <div className="h-48 w-full relative bg-gray-100 dark:bg-gray-800 rounded-t-lg flex items-center justify-center">
               {brand.logoUrl ? (
                 <img
                   src={brand.logoUrl}
@@ -109,19 +110,17 @@ export function BrandsPage() {
                   className="absolute inset-0 w-full h-full object-contain p-4"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Building className="w-12 h-12 text-gray-400 dark:text-gray-500" />
-                </div>
+                <Building className="w-12 h-12 text-gray-400 dark:text-gray-500" />
               )}
             </div>
-            <div className="p-6">
+            <div className="p-6 flex-1 flex flex-col">
               <h3 className="text-lg font-semibold text-light-text-primary dark:text-dark-text-primary mb-2 font-display">
                 {brand.name}
               </h3>
-              <p className="text-light-text-secondary dark:text-dark-text-secondary mb-4">
+              <p className="text-light-text-secondary dark:text-dark-text-secondary mb-4 flex-1">
                 {brand.description}
               </p>
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-2 mt-auto">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
